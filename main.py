@@ -1,13 +1,9 @@
-import requests
-from bs4 import BeautifulSoup
-import re
-from utils import *
+from tools import *
 
 URL = 'https://windows.php.net/downloads/releases/archives/'
-page = requests.get(URL)
 
-soup = BeautifulSoup(page.content, 'html.parser')
 
-links = soup.find_all('a')
+links = extractLinks(URL)
+releases = clearData(links)
+print(releases)
 
-print(parsePHPVersions(links))

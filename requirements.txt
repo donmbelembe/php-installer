@@ -1,2 +1,4 @@
 requests==2.23
 beautifulsoup4==4.9
+pandas==1.0.4
+packaging==20.4
