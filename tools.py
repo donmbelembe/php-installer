@@ -13,7 +13,7 @@ def extractLinks(URL):
     links = [link.get('href').split('/')[-1] for link in links]
     return links
 
-def clearData(data):
+def clearData(data, latestPath = True):
     data = {
         "path": data
     }
@@ -23,6 +23,11 @@ def clearData(data):
     # Select windows related datas
     df = df[df["path"].str.contains("Win")]
     df = df[df["path"].str.endswith('.zip')]
+
+    # Remove all .zip in the end of string
+    paths = Series(df["path"]).apply(str)
+    paths = paths.apply(lambda x: x[:-4])
+    df["path"] = paths
 
     # add version column
     df["version"] = df["path"].str.split("-").str[1]
@@ -43,7 +48,10 @@ def clearData(data):
     minor = versions.apply(lambda x: "{}.{}".format(parse(x).major,parse(x).minor))
     df2["minor"] = minor
 
-    # Groupe by minor releases
-    idx = df2.groupby(['minor'])['version'].transform(max) == df['version']
-    phpReleases = DataFrame(df2[idx])
-    return phpReleases.groupby('minor')
+    if latestPath:
+        # Groupe by minor releases
+        idx = df2.groupby(['minor'])['version'].transform(max) == df['version']
+        phpReleases = DataFrame(df2[idx])
+        return phpReleases.groupby('minor')
+
+    return df2.groupby('minor')

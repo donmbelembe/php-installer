@@ -1,12 +1,22 @@
 from tools import *
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QStandardItemModel, QStandardItem
 
 URL = 'https://windows.php.net/downloads/releases/archives/'
 
 
-links = extractLinks(URL)
-releases = clearData(links)
-print(releases)
+class StandardItem(QStandardItem):
+    def __init__(self, txt="", font_size=10, set_bold=False, color=QtGui.QColor(0,0,0)):
+        super().__init__()
+
+        fnt = QtGui.QFont('Open Sans', font_size)
+        fnt.setBold(set_bold)
+
+        self.setEditable(False)
+        self.setForeground(color)
+        self.setFont(fnt)
+        self.setText(txt)
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -42,6 +52,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setSpacing(7)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.latestPatchcheckBox = QtWidgets.QCheckBox(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.latestPatchcheckBox.setFont(font)
+        self.latestPatchcheckBox.setChecked(True)
+        self.latestPatchcheckBox.setObjectName("latestPatchcheckBox")
+        self.horizontalLayout_2.addWidget(self.latestPatchcheckBox)
         self.loadBtn = QtWidgets.QPushButton(self.centralwidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -54,12 +71,6 @@ class Ui_MainWindow(object):
         self.installBtn.setFont(font)
         self.installBtn.setObjectName("installBtn")
         self.horizontalLayout_2.addWidget(self.installBtn)
-        self.withTScheckBox = QtWidgets.QCheckBox(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.withTScheckBox.setFont(font)
-        self.withTScheckBox.setObjectName("withTScheckBox")
-        self.horizontalLayout_2.addWidget(self.withTScheckBox)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.horizontalLayout.addLayout(self.verticalLayout_4)
         self.verticalLayout_5 = QtWidgets.QVBoxLayout()
@@ -242,13 +253,16 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        # By Don
+        self.loadBtn.clicked.connect(self.load)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PHP windows installer"))
         self.label.setText(_translate("MainWindow", "Available PHP versions:"))
+        self.latestPatchcheckBox.setText(_translate("MainWindow", "Only latest patch"))
         self.loadBtn.setText(_translate("MainWindow", "Load"))
         self.installBtn.setText(_translate("MainWindow", "Install"))
-        self.withTScheckBox.setText(_translate("MainWindow", "With thread safe"))
         self.label_2.setText(_translate("MainWindow", "Installed PHP versions:"))
         self.removeBtn.setText(_translate("MainWindow", "Delete"))
         self.useBtn.setText(_translate("MainWindow", "Use"))
@@ -264,6 +278,24 @@ class Ui_MainWindow(object):
         self.configBtn.setText(_translate("MainWindow", "Open php.ini file"))
         self.checkBox.setText(_translate("MainWindow", "Update composer setting"))
 
+    def load(self):
+        links = extractLinks(URL)
+        releases = clearData(links, self.latestPatchcheckBox.isChecked())
+
+        treeModel = QStandardItemModel()
+        rootNode = treeModel.invisibleRootItem()
+
+        for name, group in releases:
+            version = StandardItem("PHP " + name)
+            rootNode.appendRow(version)
+
+            for index, serie in group.iterrows():
+                r = StandardItem(serie["path"])
+                version.appendRow(r)
+
+        self.phpVersionsTreeView.setModel(treeModel)
+        # self.phpVersionsTreeView.expandAll()
+        self.phpVersionsTreeView.setHeaderHidden(True)
 
 if __name__ == "__main__":
     import sys
