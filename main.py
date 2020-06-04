@@ -237,10 +237,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addLayout(self.verticalLayout_7)
         self.horizontalLayout.addLayout(self.verticalLayout_6)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
-        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setProperty("value", 24)
-        self.progressBar.setObjectName("progressBar")
-        self.verticalLayout_3.addWidget(self.progressBar)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 804, 26))
@@ -255,6 +251,7 @@ class Ui_MainWindow(object):
 
         # By Don
         self.loadBtn.clicked.connect(self.load)
+        self.installBtn.clicked.connect(self.install)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -287,15 +284,24 @@ class Ui_MainWindow(object):
 
         for name, group in releases:
             version = StandardItem("PHP " + name)
+            version.setSelectable(False)
             rootNode.appendRow(version)
 
             for index, serie in group.iterrows():
                 r = StandardItem(serie["path"])
                 version.appendRow(r)
-
         self.phpVersionsTreeView.setModel(treeModel)
         # self.phpVersionsTreeView.expandAll()
         self.phpVersionsTreeView.setHeaderHidden(True)
+        self.statusbar.showMessage('100%', 2000)
+
+    def install(self):
+        if self.phpVersionsTreeView.selectedIndexes():
+            name = self.phpVersionsTreeView.selectedIndexes()[0].data()
+            download('{}{}.zip'.format(URL, name), name)
+            self.statusbar.showMessage('Done!', 2000)
+        else:
+            self.statusbar.showMessage('Please select a package first', 2000)
 
 if __name__ == "__main__":
     import sys

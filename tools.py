@@ -2,6 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from pandas import DataFrame, Series
 from packaging.version import Version, parse
+import os, os.path
+import zipfile
+from shutil import copyfile
+
+if not os.path.exists("PHP/"):
+    os.makedirs("PHP/")
 
 def extractLinks(URL):
     # extract links web scraping
@@ -55,3 +61,13 @@ def clearData(data, latestPath = True):
         return phpReleases.groupby('minor')
 
     return df2.groupby('minor')
+
+def download(url, name):
+    path = 'PHP/' + name
+    r = requests.get(url, allow_redirects=True)
+    open(path + '.zip', 'wb').write(r.content)
+    with zipfile.ZipFile(path + '.zip', 'r') as zip_ref:
+        zip_ref.extractall(path)
+
+    os.remove(path + '.zip')
+    copyfile(path + '/php.ini-development', path + '/php.ini')
