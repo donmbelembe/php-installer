@@ -64,10 +64,16 @@ def clearData(data, latestPath = True):
 
 def download(url, name):
     path = 'PHP/' + name
-    r = requests.get(url, allow_redirects=True)
-    open(path + '.zip', 'wb').write(r.content)
-    with zipfile.ZipFile(path + '.zip', 'r') as zip_ref:
-        zip_ref.extractall(path)
+    r = requests.get(url, allow_redirects=True, stream=True)
 
-    os.remove(path + '.zip')
-    copyfile(path + '/php.ini-development', path + '/php.ini')
+    if r.status_code == 200:
+        with open(path + '.zip', 'wb') as f:
+            for chunk in r:
+                # print('Writing chunk') # Uncomment this to show that the file is being written chunk-by-chunk when parts of the data is received
+                f.write(chunk) # Write each chunk received to a file
+            # f.write(r.content)
+        with zipfile.ZipFile(path + '.zip', 'r') as zip_ref:
+            zip_ref.extractall(path)
+
+        os.remove(path + '.zip')
+        copyfile(path + '/php.ini-development', path + '/php.ini')
