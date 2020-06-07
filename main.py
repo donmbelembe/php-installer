@@ -25,6 +25,11 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.setupUi(self)
         self.loadBtn.clicked.connect(self.load)
         self.installBtn.clicked.connect(self.install)
+
+        for i in installedPHP:
+            self.installedVesionList.addItem(i) 
+
+
     def load(self):
         links = extractLinks(URL)
         releases = clearData(links, self.latestPatchcheckBox.isChecked())
@@ -48,17 +53,17 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
     def install(self):
         if self.phpVersionsTreeView.selectedIndexes():
             name = self.phpVersionsTreeView.selectedIndexes()[0].data()
+            if any(name in s for s in installedPHP):
+                self.statusbar.showMessage('This package is already installed', 2000)
+                return
             download('{}{}.zip'.format(URL, name), name)
             self.statusbar.showMessage('Done!', 2000)
+            self.installedVesionList.addItem(name) 
         else:
             self.statusbar.showMessage('Please select a package first', 2000)
 
-# app = QtWidgets.QApplication(sys.argv)
-# window = MainWindow()
-# app.exec_()
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = MainWindow()
     MainWindow.show()

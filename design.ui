@@ -58,7 +58,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Only latest patch</string>
+             <string>Latest patch</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -108,13 +108,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListView" name="installedVesionList">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-         </widget>
+         <widget class="QListWidget" name="installedVesionList"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">

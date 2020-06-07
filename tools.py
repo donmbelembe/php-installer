@@ -9,6 +9,9 @@ from shutil import copyfile
 if not os.path.exists("PHP/"):
     os.makedirs("PHP/")
 
+installDir = "PHP"
+installedPHP = list(filter(lambda x: os.path.isdir(os.path.join(installDir, x)), os.listdir(installDir)))
+
 def extractLinks(URL):
     # extract links web scraping
     page = requests.get(URL)
