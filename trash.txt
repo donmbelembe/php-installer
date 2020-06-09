@@ -1,0 +1,30 @@
+Step 3: Configure php.ini
+Copy C:\php\php.ini-development to C:\php\php.ini. There are several lines you will need to change in a text editor (use search to find the current setting). Where applicable, you will need to remove the leading semicolon to uncomment these setting.
+
+Define the extension directory:
+
+extension_dir = "C:/php/ext"
+Enable extensions. This will depend on the libraries you want to use, but the following extensions should be suitable for the majority of applications:
+
+extension=curl
+extension=gd2
+extension=mbstring
+extension=mysql
+extension=pdo_mysql
+extension=xmlrpc
+
+
+python setup.py build
+<!-- Simple installation for windows -->
+python setup.py bdist_msi
+
+
+
+
+
+
+HKEY_CURRENT_USER\Environment:Path=C:\Users\donmb\AppData\Local\Programs\Python\PYTHON~1\Scripts\;C:\Users\donmb\AppData\Local\Programs\Python\PYTHON~1\;C:\PROGRA~1\nodejs\NODE_M~1\npm\NODE_M~1\NPM-LI~1\NODE-G~1;C:\Users\donmb\AppData\Roaming\npm\NODE_M~1\WINDOW~1\NODE_M~1\BIN~1;C:\PROGRA~2\Intel\ICLSCL~1\;C:\PROGRA~2\COMMON~1\Oracle\Java\javapath;C:\PROGRA~1\Intel\ICLSCL~1\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\PROGRA~1\Git\cmd;C:\PROGRA~2\WI3CF2~1\10\WINDOW~1\;C:\PROGRA~1\MICROS~3\130\Tools\Binn\;C:\PROGRA~1\dotnet\;C:\PROGRA~1\nodejs\;C:\PROGRA~1\PuTTY\;C:\APACHE~1.5\bin;C:\PROGRA~2\NSIS\Bin;C:\PROGRA~1\Intel\WiFi\bin\;C:\PROGRA~1\COMMON~1\Intel\WIRELE~1\;C:\PROGRA~2\Intel\INTEL(~1\DAL;C:\PROGRA~1\Intel\INTEL(~4\DAL;C:\PROGRA~2\Intel\INTEL(~1\IPT;C:\PROGRA~1\Intel\INTEL(~4\IPT;C:\PROGRA~1\PHP;C:\PROGRA~3\COMPOS~1\bin;C:\PROGRA~1\MySQL\MYSQLS~1.0\bin;C:\PROGRA~3\CHOCOL~1\bin;C:\Users\donmb\ANDROI~2\PLATFO~1;C:\Users\donmb\ANDROI~2\tools;C:\PROGRA~2\GRAPHV~1.38\bin;C:\PROGRA~2\MI3EDC~1\CLIENT~1\ODBC\130\Tools\Binn\;C:\PROGRA~2\MI3EDC~1\140\Tools\Binn\;C:\PROGRA~2\MI3EDC~1\140\DTS\Binn\;C:\PROGRA~2\MI3EDC~1\140\Tools\Binn\MANAGE~1\;C:\Users\donmb\AppData\Roaming\Composer\vendor\bin;C:\Users\donmb\AppData\Local\Programs\Fiddler;C:\Users\donmb\AppData\Local\Programs\MICROS~1\bin;%USERPROFILE%\AppData\Local\Microsoft\WindowsApps;%PhpStorm%;%USERPROFILE%\go\bin;C:\Users\donmb\AppData\Roaming\npm;%PyCharm Community Edition%
+HKEY_CURRENT_USER\Environment:PhpStorm=C:\Program Files\JetBrains\PhpStorm 2019.2.2\bin;
+HKEY_CURRENT_USER\Environment:PyCharm Community Edition=C:\Program Files\JetBrains\PyCharm Community Edition 2020.1.1\bin;
+HKEY_CURRENT_USER\Environment:TEMP=%USERPROFILE%\AppData\Local\Temp
+HKEY_CURRENT_USER\Environment:TMP=%USERPROFILE%\AppData\Local\Temp

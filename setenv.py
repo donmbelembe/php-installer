@@ -18,7 +18,8 @@ changes would apply only for new command-windows.
 """
 
 import winreg
-import os, sys, win32gui, win32con
+import win32gui, win32con
+from win32gui import SendMessage as win32gui_SendMessage
 
 def reg_key(tree, path, varname):
     return {
@@ -50,7 +51,7 @@ def show_all(tree, path, key):
     return entries
 
 def notify_windows(action, tree, path, varname, value):
-    win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
+    win32gui_SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
     return { 
         'action': action, 
         'reg_entry': reg_entry(tree, path, varname, value)

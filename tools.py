@@ -1,9 +1,10 @@
-import requests
+from requests import get as requests_get
 from bs4 import BeautifulSoup
 from pandas import DataFrame, Series
 from packaging.version import Version, parse
-import os, win32file
-import zipfile
+from win32file import GetLongPathName
+import os
+from zipfile import ZipFile
 from shutil import copyfile, rmtree
 import subprocess
 from setenv import manage_registry_env_vars
@@ -17,7 +18,7 @@ installedPHP = list(filter(lambda x: os.path.isdir(os.path.join(installDir, x)),
 
 def extractLinks(URL):
     # extract links web scraping
-    page = requests.get(URL)
+    page = requests_get(URL)
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
@@ -70,7 +71,7 @@ def clearData(data, latestPath = True):
 
 def download(url, name):
     path = 'PHP/' + name
-    r = requests.get(url, allow_redirects=True, stream=True)
+    r = requests_get(url, allow_redirects=True, stream=True)
 
     if r.status_code == 200:
         with open(path + '.zip', 'wb') as f:
@@ -78,7 +79,7 @@ def download(url, name):
                 # print('Writing chunk') # Uncomment this to show that the file is being written chunk-by-chunk when parts of the data is received
                 f.write(chunk) # Write each chunk received to a file
             # f.write(r.content)
-        with zipfile.ZipFile(path + '.zip', 'r') as zip_ref:
+        with ZipFile(path + '.zip', 'r') as zip_ref:
             zip_ref.extractall(path)
 
         os.remove(path + '.zip')
@@ -92,7 +93,7 @@ def removePathItem(path, item):
     indexFound = 0
     for i, p in enumerate(path, 1):
         try:
-            p1 = os.path.normcase(win32file.GetLongPathName(r'{}'.format(p))).rstrip('\\')
+            p1 = os.path.normcase(GetLongPathName(r'{}'.format(p))).rstrip('\\')
             if p1 == item: 
                 indexFound = i
                 break
