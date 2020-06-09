@@ -51,7 +51,10 @@ def show_all(tree, path, key):
 
 def notify_windows(action, tree, path, varname, value):
     win32gui.SendMessage(win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0, 'Environment')
-    print("notify_windows ---%s %s" % (action, reg_entry(tree, path, varname, value)))
+    return { 
+        'action': action, 
+        'reg_entry': reg_entry(tree, path, varname, value)
+    }
 
 def manage_registry_env_vars(varname=None, value=None):
     reg_keys = [
@@ -71,7 +74,7 @@ def manage_registry_env_vars(varname=None, value=None):
                                 varname = varname[1:]
                                 value = query_value(key, varname)
                                 winreg.DeleteValue(key, varname)
-                                notify_windows("Deleted", tree_name, path, varname, value)
+                                return notify_windows("Deleted", tree_name, path, varname, value)
                                 break  ## Don't propagate into user-tree.
                             else:
                                 value = query_value(key, varname)
@@ -81,7 +84,7 @@ def manage_registry_env_vars(varname=None, value=None):
                                 varname = varname[1:]
                                 value = query_value(key, varname) + ';' + value
                             winreg.SetValueEx(key, varname, 0, winreg.REG_EXPAND_SZ, value)
-                            notify_windows("Updated", tree_name, path, varname, value)
+                            return notify_windows("Updated", tree_name, path, varname, value)
                             break  ## Don't propagate into user-tree.
         except PermissionError as ex:
             print("!!!Cannot access %s due to: %s" % 

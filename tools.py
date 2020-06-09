@@ -88,26 +88,30 @@ def remove(name):
     path = 'PHP/' + name
     rmtree(path)
 
+def removePathItem(path, item):
+    indexFound = 0
+    for i, p in enumerate(path, 1):
+        try:
+            p1 = os.path.normcase(win32file.GetLongPathName(r'{}'.format(p))).rstrip('\\')
+            if p1 == item: 
+                indexFound = i
+                break
+        except:
+            pass
+    if indexFound:
+        del path[indexFound-1]
+        # try again
+        removePathItem(path, item)
+    return path
+
 def cleanPath():
     result = subprocess.run(['where', 'php'], stdout=subprocess.PIPE)
     result = result.stdout.decode('utf-8')
     if result:
-        path1 = os.path.normcase(result.strip()[:-7]).rstrip('\\')
-        list_of_paths = manage_registry_env_vars('PATH')['value'].split(';')
-        indexFound = 0
-        for i, p in enumerate(list_of_paths, 1):
-            try:
-                p1 = os.path.normcase(win32file.GetLongPathName(r'{}'.format(p))).rstrip('\\')
-                if p1 == path1: 
-                    indexFound = i
-                    break
-            except:
-                pass
-        if indexFound:
-            del list_of_paths[indexFound-1]
+        installedPath = result.splitlines()
+        for i, p in enumerate(installedPath):
+            p = os.path.normcase(p.strip()[:-7]).rstrip('\\')
 
-            NEW_PATH = ';'.join(list_of_paths)
+            path = manage_registry_env_vars('PATH')['value'].split(';')
+            NEW_PATH = ';'.join(removePathItem(path, p))
             manage_registry_env_vars('PATH', NEW_PATH)
-            cleanPath()
-
-    # C:\PROGRA~1\PHP

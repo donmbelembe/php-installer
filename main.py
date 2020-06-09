@@ -74,8 +74,11 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
     def use(self):
         if self.installedVesionList.currentItem():
             cleanPath()
+            path = os.path.join(os.getcwd(), installDir, self.installedVesionList.currentItem().text())
+            manage_registry_env_vars('+PATH', path)
+            self.statusbar.showMessage('Updated', 2000)
         else:
-            self.statusbar.showMessage('Please select the installed package you want to delete', 2000)
+            self.statusbar.showMessage('Please select the installed package you want to install', 2000)
 
 
 if __name__ == "__main__":
