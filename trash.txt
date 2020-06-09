@@ -18,6 +18,9 @@ python setup.py build
 <!-- Simple installation for windows -->
 python setup.py bdist_msi
 
+pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
+https://www.learnpyqt.com/courses/packaging-and-distribution/packaging-pyqt5-pyside2-applications-windows-pyinstaller/
+
 
 
 

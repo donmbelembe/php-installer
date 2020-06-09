@@ -39,14 +39,15 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         treeModel = QStandardItemModel()
         rootNode = treeModel.invisibleRootItem()
 
-        for name, group in releases:
+        for name, group in releases.items():
             version = StandardItem("PHP " + name)
             version.setSelectable(False)
             rootNode.appendRow(version)
 
-            for index, serie in group.iterrows():
-                r = StandardItem(serie["path"])
+            for n, v in group:
+                r = StandardItem(n)
                 version.appendRow(r)
+
         self.phpVersionsTreeView.setModel(treeModel)
         # self.phpVersionsTreeView.expandAll()
         self.phpVersionsTreeView.setHeaderHidden(True)

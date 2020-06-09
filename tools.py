@@ -1,6 +1,5 @@
 from requests import get as requests_get
 from bs4 import BeautifulSoup
-from pandas import DataFrame, Series
 from packaging.version import Version, parse
 from win32file import GetLongPathName
 import os
@@ -26,48 +25,41 @@ def extractLinks(URL):
     links = [link.get('href').split('/')[-1] for link in links]
     return links
 
+def filterWindowsItems(data):
+    data = [d for d in data if "Win" in d and d.endswith(".zip")]
+    # remove .zip at the end     
+    data = [d[:-4] for d in data]
+    # transform to list of name, version
+    newList = list()
+    for i, d in enumerate(data):
+        newList.append((d, d.split("-")[1]))
+    # only keep those who have valid version
+    newList = [i for i in newList if isinstance(parse(i[1]), Version)]
+    # add minor version
+    for i, d in enumerate(newList):
+        newList[i] = d[0], d[1], "{}.{}".format(parse(d[1]).major,parse(d[1]).minor)
+    return newList
+
+def groupByMinorRelease(data, patch=True):
+    # group by minor version
+    Output = {} 
+    for x, y, z in data: 
+        if z in Output: 
+            if patch:
+                if parse(y) == parse(Output[z][0][1]):
+                    Output[z].append((x, y)) 
+                elif parse(y) > parse(Output[z][0][1]):
+                    Output[z] = [(x, y)]
+            else:
+                Output[z].append((x, y)) 
+        else: 
+            Output[z] = [(x, y)]
+    return Output
+
 def clearData(data, latestPath = True):
-    data = {
-        "path": data
-    }
-
-    df = DataFrame(data)
-
-    # Select windows related datas
-    df = df[df["path"].str.contains("Win")]
-    df = df[df["path"].str.endswith('.zip')]
-
-    # Remove all .zip in the end of string
-    paths = Series(df["path"]).apply(str)
-    paths = paths.apply(lambda x: x[:-4])
-    df["path"] = paths
-
-    # add version column
-    df["version"] = df["path"].str.split("-").str[1]
-
-    # Temporarly add a column that contains a bool if the version is a valid version
-    for index, serie in df.iterrows():
-        isVersion = isinstance(parse(serie["version"]), Version)
-        df.at[index, "isValidVersion"] = isVersion
-
-    # Select only the rows that contains a valid version and remove the isValidVersion column
-    df = df[df["isValidVersion"]]
-    del df["isValidVersion"]
-
-    # make a clone of the dataframe
-    df2 = DataFrame(df)
-    # generate a series that contains only minor releases
-    versions = Series(df["version"]).apply(str)
-    minor = versions.apply(lambda x: "{}.{}".format(parse(x).major,parse(x).minor))
-    df2["minor"] = minor
-
-    if latestPath:
-        # Groupe by minor releases
-        idx = df2.groupby(['minor'])['version'].transform(max) == df['version']
-        phpReleases = DataFrame(df2[idx])
-        return phpReleases.groupby('minor')
-
-    return df2.groupby('minor')
+    links = filterWindowsItems(data)
+    links = groupByMinorRelease(links, latestPath) 
+    return links
 
 def download(url, name):
     path = 'PHP/' + name

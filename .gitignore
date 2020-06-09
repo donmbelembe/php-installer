@@ -130,4 +130,5 @@ dmypy.json
 >>>>>>> 0794e65b01ae13131bb29a3e1b8beb5e3873eeaf
 
 .vscode
+.idea
 PHP/
