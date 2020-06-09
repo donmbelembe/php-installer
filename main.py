@@ -25,6 +25,8 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.setupUi(self)
         self.loadBtn.clicked.connect(self.load)
         self.installBtn.clicked.connect(self.install)
+        self.removeBtn.clicked.connect(self.remove)
+        self.useBtn.clicked.connect(self.use)
 
         for i in installedPHP:
             self.installedVesionList.addItem(i) 
@@ -61,6 +63,19 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
             self.installedVesionList.addItem(name) 
         else:
             self.statusbar.showMessage('Please select a package first', 2000)
+    
+    def remove(self):
+        if self.installedVesionList.currentItem():
+            remove(self.installedVesionList.currentItem().text())
+            self.installedVesionList.takeItem(self.installedVesionList.currentRow())
+        else:
+            self.statusbar.showMessage('Please select the installed package you want to delete', 2000)
+
+    def use(self):
+        if self.installedVesionList.currentItem():
+            cleanPath()
+        else:
+            self.statusbar.showMessage('Please select the installed package you want to delete', 2000)
 
 
 if __name__ == "__main__":

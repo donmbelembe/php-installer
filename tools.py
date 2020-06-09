@@ -2,15 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 from pandas import DataFrame, Series
 from packaging.version import Version, parse
-import os, os.path
+import os, win32file
 import zipfile
-from shutil import copyfile
+from shutil import copyfile, rmtree
+import subprocess
+from setenv import manage_registry_env_vars
 
 if not os.path.exists("PHP/"):
     os.makedirs("PHP/")
 
 installDir = "PHP"
 installedPHP = list(filter(lambda x: os.path.isdir(os.path.join(installDir, x)), os.listdir(installDir)))
+
 
 def extractLinks(URL):
     # extract links web scraping
@@ -80,3 +83,31 @@ def download(url, name):
 
         os.remove(path + '.zip')
         copyfile(path + '/php.ini-development', path + '/php.ini')
+
+def remove(name):
+    path = 'PHP/' + name
+    rmtree(path)
+
+def cleanPath():
+    result = subprocess.run(['where', 'php'], stdout=subprocess.PIPE)
+    result = result.stdout.decode('utf-8')
+    if result:
+        path1 = os.path.normcase(result.strip()[:-7]).rstrip('\\')
+        list_of_paths = manage_registry_env_vars('PATH')['value'].split(';')
+        indexFound = 0
+        for i, p in enumerate(list_of_paths, 1):
+            try:
+                p1 = os.path.normcase(win32file.GetLongPathName(r'{}'.format(p))).rstrip('\\')
+                if p1 == path1: 
+                    indexFound = i
+                    break
+            except:
+                pass
+        if indexFound:
+            del list_of_paths[indexFound-1]
+
+            NEW_PATH = ';'.join(list_of_paths)
+            manage_registry_env_vars('PATH', NEW_PATH)
+            cleanPath()
+
+    # C:\PROGRA~1\PHP
