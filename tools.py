@@ -7,6 +7,7 @@ from zipfile import ZipFile
 from shutil import copyfile, rmtree
 import subprocess
 from setenv import manage_registry_env_vars
+import json
 
 if not os.path.exists("PHP/"):
     os.makedirs("PHP/")
@@ -108,3 +109,15 @@ def cleanPath():
             path = manage_registry_env_vars('PATH')['value'].split(';')
             NEW_PATH = ';'.join(removePathItem(path, p))
             manage_registry_env_vars('PATH', NEW_PATH)
+
+def currentConfig():
+    try:
+        result = subprocess.run(
+            ['php', 'phpinfo.php'],    # program and arguments
+            stdout=subprocess.PIPE,  # capture stdout
+            check=True               # raise exception if program fails
+        )
+        return json.loads(result.stdout.decode('utf-8'))
+    except:
+        return None
+

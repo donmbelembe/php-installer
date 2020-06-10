@@ -12,7 +12,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PHP windows installer</string>
+   <string>PHP installer for windows</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -156,7 +156,7 @@
            </font>
           </property>
           <property name="text">
-           <string>PHP Setup::</string>
+           <string>PHP Setup:</string>
           </property>
          </widget>
         </item>
@@ -262,36 +262,6 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Error log</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="logPathTextbox">
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="placeholderText">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
            <widget class="QLabel" name="label_8">
             <property name="font">
              <font>
@@ -303,7 +273,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="3" column="1">
            <widget class="QLineEdit" name="composerStatusTextbox">
             <property name="readOnly">
              <bool>true</bool>
@@ -315,18 +285,6 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QPushButton" name="viewLogBtn">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Open log file</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="phpInfoBtn">
             <property name="font">
              <font>
@@ -335,18 +293,6 @@
             </property>
             <property name="text">
              <string>phpinfo()</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="manageExtBtn">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Manage extensions</string>
             </property>
            </widget>
           </item>

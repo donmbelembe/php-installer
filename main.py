@@ -29,7 +29,14 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.useBtn.clicked.connect(self.use)
 
         for i in installedPHP:
-            self.installedVesionList.addItem(i) 
+            self.installedVesionList.addItem(i)
+
+
+        currentSetup = currentConfig()
+
+        self.phpVersionTextbox.setText(currentSetup['version'])
+        self.phpPathTextbox.setText(currentSetup['ini_path'][:-7])
+        self.phpIniPathTextbox.setText(currentSetup['ini_path'])
 
 
     def load(self):
