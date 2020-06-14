@@ -18,3 +18,4 @@ requests==2.23.0
 six==1.15.0
 soupsieve==2.0.1
 urllib3==1.25.9
+# pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip

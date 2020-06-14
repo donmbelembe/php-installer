@@ -1,4 +1,4 @@
-from requests import get as requests_get
+# from requests import get as requests_get
 from bs4 import BeautifulSoup
 from packaging.version import Version, parse
 from win32file import GetLongPathName
@@ -16,11 +16,8 @@ installDir = "PHP"
 installedPHP = list(filter(lambda x: os.path.isdir(os.path.join(installDir, x)), os.listdir(installDir)))
 
 
-def extractLinks(URL):
-    # extract links web scraping
-    page = requests_get(URL)
-
-    soup = BeautifulSoup(page.content, 'html.parser')
+def extractLinks(HTML):
+    soup = BeautifulSoup(HTML, 'html.parser')
 
     links = soup.find_all('a')
     links = [link.get('href').split('/')[-1] for link in links]
@@ -62,21 +59,28 @@ def clearData(data, latestPath = True):
     links = groupByMinorRelease(links, latestPath) 
     return links
 
-def download(url, name):
+def getPHPPackageInfoFromString(text):
+    info = {
+        'nts': False
+    }
+
+    if 'nts' in text:
+        info['nts'] = True
+
+    return info
+
+def saveFile(data, name):
     path = 'PHP/' + name
-    r = requests_get(url, allow_redirects=True, stream=True)
+    with open(path + '.zip', 'wb') as f:
+        for chunk in data:
+            # print('Writing chunk') # Uncomment this to show that the file is being written chunk-by-chunk when parts of the data is received
+            f.write(chunk) # Write each chunk received to a file
+        # f.write(r.content)
+    with ZipFile(path + '.zip', 'r') as zip_ref:
+        zip_ref.extractall(path)
 
-    if r.status_code == 200:
-        with open(path + '.zip', 'wb') as f:
-            for chunk in r:
-                # print('Writing chunk') # Uncomment this to show that the file is being written chunk-by-chunk when parts of the data is received
-                f.write(chunk) # Write each chunk received to a file
-            # f.write(r.content)
-        with ZipFile(path + '.zip', 'r') as zip_ref:
-            zip_ref.extractall(path)
-
-        os.remove(path + '.zip')
-        copyfile(path + '/php.ini-development', path + '/php.ini')
+    os.remove(path + '.zip')
+    copyfile(path + '/php.ini-development', path + '/php.ini')
 
 def remove(name):
     path = 'PHP/' + name

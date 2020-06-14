@@ -309,6 +309,18 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="browseBtn">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="checkBox">
             <property name="enabled">
              <bool>true</bool>

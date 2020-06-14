@@ -1,0 +1,20 @@
+Next steps:
+
+Step 1: Configure php.ini
+There are several lines you will need to change in a text editor (use search to find the current setting). 
+Where applicable, you will need to remove the leading semicolon to uncomment these setting.
+
+Define the extension directory:
+
+extension_dir = "C:/php/ext"
+
+
+Enable extensions. This will depend on the libraries you want to use, 
+but the following extensions should be suitable for the majority of applications:
+
+extension=curl
+extension=gd2
+extension=mbstring
+extension=mysql
+extension=pdo_mysql
+extension=xmlrpc
