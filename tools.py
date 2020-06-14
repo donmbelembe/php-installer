@@ -53,7 +53,7 @@ def cleanPath():
 def currentConfig():
     try:
         result = subprocess.run(
-            ['php', 'phpinfo.php'],    # program and arguments
+            ['php', 'scripts/config.php'],    # program and arguments
             stdout=subprocess.PIPE,  # capture stdout
             check=True               # raise exception if program fails
         )

@@ -68,7 +68,7 @@ class loadPhpBinaryListWorker(QObject):
 
 class phpBinaryDownloaderWorker(QObject):
   finished = pyqtSignal()
-  resp = pyqtSignal(str)
+  resp = pyqtSignal(str, int)
   progress = pyqtSignal(str, int, int)
 
   def __init__(self, URL):
@@ -108,5 +108,5 @@ class phpBinaryDownloaderWorker(QObject):
 
       os.remove(storagePath + '.zip')
       copyfile(storagePath + '/php.ini-development', storagePath + '/php.ini')
-    self.resp.emit(self.pkg)
+    self.resp.emit(self.pkg, time.process_time() - start)
     self.finished.emit()

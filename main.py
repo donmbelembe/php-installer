@@ -4,6 +4,7 @@ import sys
 from PyQt5.Qt import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import pyqtSlot, QThread
 from workers import loadPhpBinaryListWorker, phpBinaryDownloaderWorker
+from hurry.filesize import size, alternative
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'design.ui'))
@@ -25,6 +26,8 @@ class StandardItem(QStandardItem):
         self.setText(txt)
 
 class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
+    EXIT_CODE_REBOOT = -12345678
+
     def __init__(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -127,17 +130,18 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         else:
             self.alert('Attention', 'You must select an available PHP version in the list first')
     
-    @pyqtSlot(str)
-    def phpBinaryInstallationDone(self, name):
+    @pyqtSlot(str, int)
+    def phpBinaryInstallationDone(self, name, timelapse):
         self.progressBar.hide()
         self.toggleButton(True)
-        self.statusbar.showMessage('Done!', 2000)
+        self.statusbar.showMessage('{} installed successfully in {} ms'.format(name, timelapse), 2000)
         self.installedVesionList.addItem(name) 
         os.startfile('post-install.txt')
 
     @pyqtSlot(str, int, int)
     def phpDownLoaderProgress(self, name, done, bps):
-        self.statusbar.showMessage('Installing {}: {}% - {} bps'.format(name, done, bps), 20000)
+        speed = 'Speed: ' + size(bps, system=alternative) + '/S'
+        self.statusbar.showMessage('{} | {}'.format(name, speed), 20000)
         self.progressBar.setValue(done)
 
     def remove(self):
@@ -153,6 +157,7 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
             path = os.path.join(os.getcwd(), installDir, self.installedVesionList.currentItem().text())
             manage_registry_env_vars('+PATH', path)
             self.statusbar.showMessage('Updated', 2000)
+            QtWidgets.qApp.exit(MainWindow.EXIT_CODE_REBOOT)
         else:
             self.statusbar.showMessage('Please select the installed package you want to install', 2000)
 
@@ -170,7 +175,12 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.loadBtn.setEnabled(state)
 
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = MainWindow()
-    MainWindow.show()
-    sys.exit(app.exec_())
+    currentExitCode = MainWindow.EXIT_CODE_REBOOT
+    while currentExitCode == MainWindow.EXIT_CODE_REBOOT:
+        a = QtWidgets.QApplication(sys.argv)
+        w = MainWindow()
+        w.show()
+        currentExitCode = a.exec_()
+        a = None  # delete the QApplication object
+
+    sys.exit(currentExitCode)
