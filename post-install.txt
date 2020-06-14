@@ -1,6 +1,6 @@
-Next steps:
+Please READ CAREFULLY
 
-Step 1: Configure php.ini
+Configure php.ini
 There are several lines you will need to change in a text editor (use search to find the current setting). 
 Where applicable, you will need to remove the leading semicolon to uncomment these setting.
 
@@ -18,3 +18,8 @@ extension=mbstring
 extension=mysql
 extension=pdo_mysql
 extension=xmlrpc
+
+Make sure you have the corresponding Visual C++ binaries installed
+you can download them from here:
+
+https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads
