@@ -10,7 +10,8 @@ if not os.path.exists("PHP/"):
 
 def getPHPPackageInfoFromString(text):
     info = {
-        'nts': False
+        'nts': False,
+        'version': text.split("-")[1],
     }
 
     if 'nts' in text:
@@ -53,7 +54,7 @@ def cleanPath():
 def currentConfig():
     try:
         result = subprocess.run(
-            ['php', 'scripts/config.php'],    # program and arguments
+            ['php', os.path.join('config.php')],    # program and arguments
             stdout=subprocess.PIPE,  # capture stdout
             check=True               # raise exception if program fails
         )

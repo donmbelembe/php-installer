@@ -10,6 +10,13 @@ from packaging.version import Version, parse
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 import time
 
+if getattr(sys, 'frozen', False):
+    # frozen
+    dir_ = os.path.dirname(sys.executable)
+else:
+    # unfrozen
+    dir_ = os.path.dirname(os.path.realpath(__file__))
+
 
 class loadPhpBinaryListWorker(QObject):
   finished = pyqtSignal()
@@ -84,7 +91,7 @@ class phpBinaryDownloaderWorker(QObject):
     if self.pkg:
       url = '{}{}.zip'.format(self.URL, self.pkg)
       storagePath = 'PHP/' + self.pkg
-      with open(storagePath + '.zip', 'wb') as f:
+      with open(os.path.join(storagePath + '.zip'), 'wb') as f:
         start = time.process_time()
         response  = requests_get(url, stream=True)
 
@@ -103,10 +110,10 @@ class phpBinaryDownloaderWorker(QObject):
               bps = dl//(time.process_time() - start)
               self.progress.emit(self.pkg, done, bps)
 
-      with ZipFile(storagePath + '.zip', 'r') as zip_ref:
-        zip_ref.extractall(storagePath)
+      with ZipFile(os.path.join(storagePath + '.zip'), 'r') as zip_ref:
+        zip_ref.extractall(os.path.join(storagePath))
 
-      os.remove(storagePath + '.zip')
+      os.remove(os.path.join(storagePath + '.zip'))
       copyfile(storagePath + '/php.ini-development', storagePath + '/php.ini')
     self.resp.emit(self.pkg, time.process_time() - start)
     self.finished.emit()
