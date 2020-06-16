@@ -2,11 +2,12 @@ altgraph==0.17
 beautifulsoup4==4.9.0
 certifi==2020.4.5.1
 chardet==3.0.4
+cx-Freeze==6.1
 future==0.18.2
+hfilesize==0.1.0
 idna==2.9
 packaging==20.4
 pefile==2019.4.18
-pyinstaller @ https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 pyparsing==2.4.7
 PyQt5==5.15.0
 PyQt5-sip==12.8.0
@@ -18,4 +19,3 @@ requests==2.23.0
 six==1.15.0
 soupsieve==2.0.1
 urllib3==1.25.9
-# pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip

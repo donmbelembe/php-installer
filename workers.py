@@ -9,6 +9,10 @@ from bs4 import BeautifulSoup
 from packaging.version import Version, parse
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 import time
+import subprocess
+from setenv import manage_registry_env_vars
+from win32file import GetLongPathName
+# from win32api import GetShortPathName
 
 if getattr(sys, 'frozen', False):
     # frozen
@@ -18,7 +22,7 @@ else:
     dir_ = os.path.dirname(os.path.realpath(__file__))
 
 
-class loadPhpBinaryListWorker(QObject):
+class LoadPhpBinaryListWorker(QObject):
   finished = pyqtSignal()
   resp = pyqtSignal(list)
 
@@ -73,7 +77,7 @@ class loadPhpBinaryListWorker(QObject):
     self.resp.emit(releases)
     self.finished.emit()
 
-class phpBinaryDownloaderWorker(QObject):
+class PhpBinaryDownloaderWorker(QObject):
   finished = pyqtSignal()
   resp = pyqtSignal(str, int)
   progress = pyqtSignal(str, int, int)
@@ -116,4 +120,51 @@ class phpBinaryDownloaderWorker(QObject):
       os.remove(os.path.join(storagePath + '.zip'))
       copyfile(storagePath + '/php.ini-development', storagePath + '/php.ini')
     self.resp.emit(self.pkg, time.process_time() - start)
+    self.finished.emit()
+
+
+class UpdatePATHWorker(QObject):
+  finished = pyqtSignal()
+
+  def __init__(self):
+    super().__init__()
+    self.path = manage_registry_env_vars('PATH')['value'].split(os.pathsep)
+    self.pathToAdd = None
+
+  def setPathToAdd(self, pathToAdd):
+    self.pathToAdd = pathToAdd
+
+  def removePathItem(self, item):
+    indexFound = 0
+    for i, p in enumerate(self.path, 1):
+        try:
+            p1 = os.path.normcase(GetLongPathName(r'{}'.format(p))).rstrip('\\')
+            if p1 == item: 
+                indexFound = i
+                break
+        except:
+            pass
+    if indexFound:
+        del self.path[indexFound-1]
+        # try again
+        self.removePathItem(item)
+
+  def clearExistedPHPPaths(self):
+    result = subprocess.run(['where', 'php'], stdout=subprocess.PIPE)
+    result = result.stdout.decode('utf-8')
+    if result:
+      installedPath = result.splitlines()
+      for i, p in enumerate(installedPath):
+        if p:
+          p = os.path.normcase(p.strip()[:-7]).rstrip('\\')
+          self.removePathItem(p)
+
+  @pyqtSlot()
+  def update(self):
+    if self.pathToAdd:
+      self.clearExistedPHPPaths()
+      self.path.append(self.pathToAdd)
+      NEW_PATH = ';'.join(self.path)
+      manage_registry_env_vars('PATH', NEW_PATH)
+      os.environ['PATH'] = NEW_PATH
     self.finished.emit()

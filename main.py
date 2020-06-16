@@ -3,11 +3,17 @@ from PyQt5 import QtWidgets, uic, QtGui
 import sys
 from PyQt5.Qt import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import pyqtSlot, QThread
-from workers import loadPhpBinaryListWorker, phpBinaryDownloaderWorker
-from hurry.filesize import size, alternative
+from workers import LoadPhpBinaryListWorker, PhpBinaryDownloaderWorker, UpdatePATHWorker
+from hfilesize import FileSize
 
+if getattr(sys, 'frozen', False):
+    # frozen
+    dir_ = os.path.dirname(sys.executable)
+else:
+    # unfrozen
+    dir_ = os.path.dirname(os.path.realpath(__file__))
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'design.ui'))
+FORM_CLASS, _ = uic.loadUiType(os.path.join(dir_, 'design.ui'))
 
 installDir = "PHP"
 URL = 'https://windows.php.net/downloads/releases/archives/'
@@ -26,8 +32,6 @@ class StandardItem(QStandardItem):
         self.setText(txt)
 
 class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
-    EXIT_CODE_REBOOT = -12345678
-
     def __init__(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -43,36 +47,46 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         for i in installedPHP:
             self.installedVesionList.addItem(i)
 
-        currentSetup = currentConfig()
+        self.currentSetup = currentConfig()
         self.availableReleases = list()
 
-        self.phpVersionTextbox.setText(currentSetup['version'])
-        self.phpPathTextbox.setText(currentSetup['ini_path'][:-7])
-        self.phpIniPathTextbox.setText(currentSetup['ini_path'])
+        if self.currentSetup:
+            self.displayCurrentConfig()
 
         self.loadBtn.clicked.connect(self.load)
         self.installBtn.clicked.connect(self.install)
         self.removeBtn.clicked.connect(self.remove)
         self.useBtn.clicked.connect(self.use)
-        self.configBtn.clicked.connect(lambda: os.startfile(currentSetup['ini_path']))
-        self.browseBtn.clicked.connect(lambda: os.startfile(currentSetup['ini_path'][:-7]))
+        self.configBtn.clicked.connect(lambda: os.startfile(self.currentSetup['ini_path']))
+        self.browseBtn.clicked.connect(lambda: os.startfile(self.currentSetup['ini_path'][:-7]))
 
         # create Worker and Thread inside the Form
         # Load list PHP
         self.loadPhpBinaryListThread = QThread()
-        self.loadingObj = loadPhpBinaryListWorker(URL)
+        self.loadingObj = LoadPhpBinaryListWorker(URL)
         self.loadingObj.resp.connect(self.versionsDownloaderResponse)
         self.loadingObj.moveToThread(self.loadPhpBinaryListThread)
         self.loadingObj.finished.connect(self.loadPhpBinaryListThread.quit)
         self.loadPhpBinaryListThread.started.connect(self.loadingObj.getList)
-        # 
+        # Download binary
         self.phpBinaryDownloaderThread = QThread()
-        self.phpBinaryDownloaderObj = phpBinaryDownloaderWorker(URL)
+        self.phpBinaryDownloaderObj = PhpBinaryDownloaderWorker(URL)
         self.phpBinaryDownloaderObj.resp.connect(self.phpBinaryInstallationDone)
         self.phpBinaryDownloaderObj.progress.connect(self.phpDownLoaderProgress)
         self.phpBinaryDownloaderObj.moveToThread(self.phpBinaryDownloaderThread)
         self.phpBinaryDownloaderObj.finished.connect(self.phpBinaryDownloaderThread.quit)
         self.phpBinaryDownloaderThread.started.connect(self.phpBinaryDownloaderObj.download)
+        # Download binary
+        self.updatePathThread = QThread()
+        self.updatePathObj = UpdatePATHWorker()
+        self.updatePathObj.moveToThread(self.updatePathThread)
+        self.updatePathObj.finished.connect(self.pathUpdated)
+        self.updatePathThread.started.connect(self.updatePathObj.update)
+    
+    def displayCurrentConfig(self):
+        self.phpVersionTextbox.setText(self.currentSetup['version'])
+        self.phpPathTextbox.setText(self.currentSetup['ini_path'][:-7])
+        self.phpIniPathTextbox.setText(self.currentSetup['ini_path'])
 
     def load(self):
         self.toggleButton(False)
@@ -140,8 +154,9 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
 
     @pyqtSlot(str, int, int)
     def phpDownLoaderProgress(self, name, done, bps):
-        speed = 'Speed: ' + size(bps, system=alternative) + '/S'
+        speed = 'Speed: ' + '{:.02fH}'.format(FileSize(bps)) + '/S'
         self.statusbar.showMessage('{} | {}'.format(name, speed), 20000)
+        # self.statusbar.showMessage('{}'.format(name), 20000)
         self.progressBar.setValue(done)
 
     def remove(self):
@@ -153,13 +168,18 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
 
     def use(self):
         if self.installedVesionList.currentItem():
-            cleanPath()
-            path = os.path.join(os.getcwd(), installDir, self.installedVesionList.currentItem().text())
-            manage_registry_env_vars('+PATH', path)
-            self.statusbar.showMessage('Updated', 2000)
-            QtWidgets.qApp.exit(MainWindow.EXIT_CODE_REBOOT)
+            name = self.installedVesionList.currentItem().text()
+            path = os.path.join(os.getcwd(), installDir, name)
+            self.updatePathObj.setPathToAdd(path)
+            self.updatePathThread.start()
         else:
             self.statusbar.showMessage('Please select the installed package you want to install', 2000)
+
+    def pathUpdated(self):
+        self.updatePathThread.quit()
+        self.statusbar.showMessage('Success', 2000)
+        self.currentSetup = currentConfig()
+        self.displayCurrentConfig()
 
     def alert(self, title, text):
         msg = QtWidgets.QMessageBox()
@@ -175,12 +195,7 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.loadBtn.setEnabled(state)
 
 if __name__ == "__main__":
-    currentExitCode = MainWindow.EXIT_CODE_REBOOT
-    while currentExitCode == MainWindow.EXIT_CODE_REBOOT:
-        a = QtWidgets.QApplication(sys.argv)
-        w = MainWindow()
-        w.show()
-        currentExitCode = a.exec_()
-        a = None  # delete the QApplication object
-
-    sys.exit(currentExitCode)
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = MainWindow()
+    MainWindow.show()
+    sys.exit(app.exec_())
