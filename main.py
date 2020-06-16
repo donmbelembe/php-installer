@@ -147,6 +147,7 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
     @pyqtSlot(str, int)
     def phpBinaryInstallationDone(self, name, timelapse):
         self.progressBar.hide()
+        self.progressBar.setValue(0)
         self.toggleButton(True)
         self.statusbar.showMessage('{} installed successfully in {} ms'.format(name, timelapse), 2000)
         self.installedVesionList.addItem(name) 
@@ -156,7 +157,6 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
     def phpDownLoaderProgress(self, name, done, bps):
         speed = 'Speed: ' + '{:.02fH}'.format(FileSize(bps)) + '/S'
         self.statusbar.showMessage('{} | {}'.format(name, speed), 20000)
-        # self.statusbar.showMessage('{}'.format(name), 20000)
         self.progressBar.setValue(done)
 
     def remove(self):
