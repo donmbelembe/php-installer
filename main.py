@@ -117,9 +117,23 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.updatePathThread.started.connect(self.updatePathObj.update)
     
     def displayCurrentConfig(self):
-        self.phpVersionTextbox.setText(self.currentSetup['version'])
-        self.phpPathTextbox.setText(self.currentSetup['ini_path'][:-7])
-        self.phpIniPathTextbox.setText(self.currentSetup['ini_path'])
+        if isinstance(self.currentSetup, str):
+            text = '''
+                <html><head/><body>
+                    <h4>PHP Says:</h4>
+                    <p><span style=" color:#ff0000;">'''+self.currentSetup+'''</span></p>
+                    <p>Note: You probably nedd to install Microsoft Visual C++ Redistributable for Visual Studio (vc15, vc14,...) please check
+                    <a href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads">this link</a></p>
+                </body></html>'''
+            self.warningLabel.setText(text)
+            self.phpVersionTextbox.setText('')
+            self.phpPathTextbox.setText('')
+            self.phpIniPathTextbox.setText('')
+        else:
+            self.warningLabel.setText('')
+            self.phpVersionTextbox.setText(self.currentSetup['version'])
+            self.phpPathTextbox.setText(self.currentSetup['ini_path'][:-7])
+            self.phpIniPathTextbox.setText(self.currentSetup['ini_path'])
 
     def load(self):
         self.toggleButton(False)

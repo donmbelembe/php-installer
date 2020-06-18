@@ -34,8 +34,9 @@ def currentConfig():
         result = subprocess.run(
             ['php', os.path.join('config.php')],    # program and arguments
             stdout=subprocess.PIPE,  # capture stdout
+            stderr=subprocess.STDOUT, # capture the error by DON
             check=True               # raise exception if program fails
         )
         return json.loads(result.stdout.decode('utf-8'))
-    except:
-        return None
+    except subprocess.CalledProcessError as err:
+        return err.output.decode('utf-8')
