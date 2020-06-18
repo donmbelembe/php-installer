@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "PHP Installer"
-#define MyAppVersion "1.24"
+#define MyAppVersion "2.0"
 #define MyAppPublisher "Don MBELEMBE"
 #define MyAppURL "https://github.com/donmbelembe"
 #define MyAppExeName "php-installer.exe"

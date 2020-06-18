@@ -68,6 +68,7 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
     def __init__(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
+        self.setWindowTitle('PHP installer for windows - 2.0')
         self.progressBar = QtWidgets.QProgressBar()
         self.statusBar().addPermanentWidget(self.progressBar)
         self.progressBar.hide()
