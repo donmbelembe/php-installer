@@ -133,3 +133,5 @@ dmypy.json
 .idea
 PHP/
 envBackup.txt
+Output/
+log.txt

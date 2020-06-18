@@ -3,8 +3,16 @@ from shutil import rmtree
 import subprocess
 import json
 
-if not os.path.exists("PHP/"):
-    os.makedirs("PHP/")
+install_dir = 'PHP'
+log_file = os.path.join('log.txt')
+
+if not os.path.exists(install_dir):
+    os.makedirs(install_dir)
+    os.chmod(install_dir, 0o777)
+
+if not os.path.exists(log_file):
+    with os.fdopen(os.open(log_file, os.O_WRONLY | os.O_CREAT, 0o777), 'w') as f:
+        f.write('...')
 
 def getPHPPackageInfoFromString(text):
     info = {

@@ -1,3 +1,4 @@
+from pyuac import isUserAdmin, runAsAdmin
 from tools import *
 from PyQt5 import QtWidgets, uic, QtGui
 import sys
@@ -5,6 +6,38 @@ from PyQt5.Qt import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import pyqtSlot, QThread
 from workers import LoadPhpBinaryListWorker, PhpBinaryDownloaderWorker, UpdatePATHWorker
 from hfilesize import FileSize
+import traceback
+import logging
+logging.basicConfig(filename=log_file,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.INFO)
+logger = logging.getLogger('php-installer')
+# handler = logging.FileHandler('php-installer.log')
+# logger.addHandler(handler)
+
+def log_exception(exc_type, exc_value, exc_traceback):
+    logger.error("Uncaught exception occurred!",
+                 exc_info=(exc_type, exc_value, exc_traceback))
+    
+    if exc_traceback:
+        format_exception = traceback.format_tb(exc_traceback)
+        for line in format_exception:
+            logger.error(repr(line))
+
+
+def attach_hook(hook_func, run_func):
+    def inner(*args, **kwargs):
+        if not (args or kwargs):
+            # This condition is for sys.exc_info
+            local_args = run_func()
+            hook_func(*local_args)
+        else:
+            # This condition is for sys.excepthook
+            hook_func(*args, **kwargs)
+        return run_func(*args, **kwargs)
+    return inner
 
 if getattr(sys, 'frozen', False):
     # frozen
@@ -195,6 +228,14 @@ class MainWindow(QtWidgets.QMainWindow, FORM_CLASS):
         self.loadBtn.setEnabled(state)
 
 if __name__ == "__main__":
+    rc = 0
+    if not isUserAdmin():
+        rc = runAsAdmin()
+        sys.exit(rc)
+
+    sys.exc_info = attach_hook(log_exception, sys.exc_info)
+    sys.excepthook = attach_hook(log_exception, sys.excepthook)
+    
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = MainWindow()
     MainWindow.show()
